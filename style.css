@@ -50,7 +50,24 @@ body {
 }
 h1 { font-size: 1.25rem; font-weight: 700; letter-spacing: -.01em; }
 .tagline { font-size: .85rem; color: var(--ink-soft); }
-.header-actions { display: flex; gap: 10px; }
+.header-actions { display: flex; gap: 10px; align-items: center; }
+
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.lang-switch button {
+  font: inherit; font-size: .78rem; font-weight: 600;
+  padding: 7px 12px; border: none; cursor: pointer;
+  background: transparent; color: var(--ink-soft);
+}
+.lang-switch button + button { border-left: 1px solid var(--line); }
+.lang-switch button[aria-checked="true"] {
+  background: color-mix(in srgb, var(--accent-ui) 14%, transparent);
+  color: var(--ink);
+}
 
 .ghost-btn {
   font: inherit; font-size: .85rem;

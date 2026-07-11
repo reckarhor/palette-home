@@ -17,6 +17,9 @@ the way interior designers work:
   click any step to copy its hex.
 - **Shareable URLs** — the palette is encoded in the query string
   (`?c=C46A2B&m=complementary&d=bright`).
+- **English & German** — a language switcher in the header; the default
+  follows the device language (`navigator.language`) and the choice is
+  remembered in `localStorage`.
 - Light/dark mode, fully client-side, no dependencies, nothing uploaded.
 
 ## Run it

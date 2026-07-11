@@ -14,12 +14,16 @@
     <span class="brand-mark" aria-hidden="true"></span>
     <div>
       <h1>Palette Home</h1>
-      <p class="tagline">Colour schemes for real rooms</p>
+      <p class="tagline" data-i18n="tagline">Colour schemes for real rooms</p>
     </div>
   </div>
   <div class="header-actions">
-    <button id="shareBtn" class="ghost-btn" title="Copy a shareable link to this palette">Share palette</button>
-    <button id="themeToggle" class="ghost-btn icon-btn" title="Toggle light / dark mode" aria-label="Toggle theme">◐</button>
+    <div id="langSwitch" class="lang-switch" role="radiogroup" aria-label="Language">
+      <button data-lang="en" role="radio">EN</button>
+      <button data-lang="de" role="radio">DE</button>
+    </div>
+    <button id="shareBtn" class="ghost-btn" data-i18n="share" data-i18n-title="shareTitle">Share palette</button>
+    <button id="themeToggle" class="ghost-btn icon-btn" data-i18n-title="themeTitle" aria-label="Toggle theme">◐</button>
   </div>
 </header>
 
@@ -29,7 +33,7 @@
   <section class="panel controls">
 
     <div class="card">
-      <h2 class="card-title">1 · Pick your colour</h2>
+      <h2 class="card-title" data-i18n="step1">1 · Pick your colour</h2>
       <div class="wheel-wrap">
         <div id="wheel" class="wheel">
           <div class="wheel-ring" aria-hidden="true"></div>
@@ -41,32 +45,32 @@
       </div>
 
       <div class="slider-row">
-        <label for="satSlider">Saturation</label>
+        <label for="satSlider" data-i18n="saturation">Saturation</label>
         <input type="range" id="satSlider" min="0" max="100" value="65">
       </div>
       <div class="slider-row">
-        <label for="lightSlider">Lightness</label>
+        <label for="lightSlider" data-i18n="lightness">Lightness</label>
         <input type="range" id="lightSlider" min="5" max="95" value="50">
       </div>
 
       <div class="hex-row">
-        <label for="hexInput" class="visually-hidden">Hex colour</label>
+        <label for="hexInput" class="visually-hidden">Hex</label>
         <input type="text" id="hexInput" spellcheck="false" autocomplete="off" placeholder="#3A7D6B" maxlength="7">
-        <button id="randomBtn" class="ghost-btn" title="Try a random starting colour">Surprise me</button>
+        <button id="randomBtn" class="ghost-btn" data-i18n="surprise" data-i18n-title="randomTitle">Surprise me</button>
       </div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">2 · Pick a mood</h2>
-      <div id="modeList" class="mode-list" role="radiogroup" aria-label="Colour harmony"></div>
+      <h2 class="card-title" data-i18n="step2">2 · Pick a mood</h2>
+      <div id="modeList" class="mode-list" role="radiogroup"></div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">3 · Your room's light</h2>
-      <div id="directionSeg" class="segmented" role="radiogroup" aria-label="Room light">
-        <button data-dir="dim"   role="radio">Dim / north-facing</button>
-        <button data-dir="avg"   role="radio">Average light</button>
-        <button data-dir="bright" role="radio">Bright / south-facing</button>
+      <h2 class="card-title" data-i18n="step3">3 · Your room's light</h2>
+      <div id="directionSeg" class="segmented" role="radiogroup">
+        <button data-dir="dim"    role="radio" data-i18n="dirDim">Dim / north-facing</button>
+        <button data-dir="avg"    role="radio" data-i18n="dirAvg">Average light</button>
+        <button data-dir="bright" role="radio" data-i18n="dirBright">Bright / south-facing</button>
       </div>
       <p id="directionNote" class="hint"></p>
     </div>
@@ -78,22 +82,22 @@
 
     <div class="card">
       <div class="card-head">
-        <h2 class="card-title" id="paletteTitle">Your palette</h2>
+        <h2 class="card-title" data-i18n="paletteTitle">Your palette</h2>
         <p id="modeBlurb" class="mode-blurb"></p>
       </div>
       <div id="swatches" class="swatches"></div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">The 60-30-10 balance</h2>
-      <p class="hint">Interior designers split a room roughly 60% dominant (walls, big pieces), 30% secondary (sofa, curtains), 10% accent (cushions, art, lamps).</p>
+      <h2 class="card-title" data-i18n="ratioTitle">The 60-30-10 balance</h2>
+      <p class="hint" data-i18n="ratioHint">Interior designers split a room roughly 60% dominant (walls, big pieces), 30% secondary (sofa, curtains), 10% accent (cushions, art, lamps).</p>
       <div id="ratioBar" class="ratio-bar" aria-hidden="true"></div>
       <div id="ratioLegend" class="ratio-legend"></div>
     </div>
 
     <div class="card">
-      <h2 class="card-title">In a room</h2>
-      <svg id="roomScene" viewBox="0 0 640 420" role="img" aria-label="Illustration of a living room recoloured with your palette">
+      <h2 class="card-title" data-i18n="roomTitle">In a room</h2>
+      <svg id="roomScene" viewBox="0 0 640 420" role="img" aria-label="Room preview">
         <!-- wall & floor -->
         <rect id="rmWall" x="0" y="0" width="640" height="310"/>
         <rect id="rmFloor" x="0" y="310" width="640" height="110"/>
@@ -146,7 +150,7 @@
     </div>
 
     <div class="card">
-      <h2 class="card-title">Why these colours work</h2>
+      <h2 class="card-title" data-i18n="whyTitle">Why these colours work</h2>
       <p id="whyText" class="why-text"></p>
       <ul id="tipList" class="tip-list"></ul>
     </div>
@@ -155,7 +159,7 @@
 </main>
 
 <footer class="site-footer">
-  <p>All colour maths runs in your browser — nothing is uploaded or tracked. LRV = Light Reflectance Value (0 dark – 100 light).</p>
+  <p data-i18n="footer">All colour maths runs in your browser — nothing is uploaded or tracked. LRV = Light Reflectance Value (0 dark – 100 light).</p>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
