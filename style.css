@@ -276,7 +276,36 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 8px; border: 1px solid var(--line);
   flex-shrink: 0; display: block;
 }
-#photoThumb.pickable { cursor: crosshair; box-shadow: 0 0 0 2px var(--accent-ui); }
+#photoThumb { cursor: zoom-in; }
+
+/* ============ photo picking modal ============ */
+.photo-modal {
+  position: fixed; inset: 0; z-index: 20;
+  background: rgba(15, 14, 12, .72);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.photo-modal[hidden] { display: none; }
+.photo-modal-inner {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  max-width: min(1000px, 94vw);
+  display: flex; flex-direction: column; gap: 12px;
+}
+#photoModalImg {
+  max-width: 100%; max-height: 68vh;
+  border-radius: 10px; border: 1px solid var(--line);
+  display: block; margin: 0 auto;
+}
+#photoModalImg.armed { cursor: crosshair; }
+.photo-modal-bar {
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.photo-modal-bar .hint { margin: 0; flex: 1; min-width: 160px; }
+.photo-modal-bar .photo-chips { margin-top: 0; }
 .photo-found { min-width: 0; }
 .photo-found .hint { margin-top: 0; }
 .photo-chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }

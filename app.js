@@ -112,8 +112,10 @@ const I18N = {
       lightGroup: "Room light",
       upload: "Upload a photo",
       uploadHint: "A room, a rug, a painting — analysed on your device, never uploaded.",
-      extracted: "Found in your photo — click a chip, then click in the photo to fine-tune that colour.",
+      extracted: "Found in your photo — click a chip or the photo to fine-tune the colours in a larger view.",
       pickHint: "Now click anywhere in the photo to pull that colour.",
+      modalPick: "Click a chip, then click in the photo.",
+      done: "Done",
       analysing: "Analysing photo…",
       imgError: "Couldn't read that image",
       chipTitle: "click, then pick the colour from the photo",
@@ -217,8 +219,10 @@ const I18N = {
       lightGroup: "Raumlicht",
       upload: "Foto hochladen",
       uploadHint: "Ein Raum, ein Teppich, ein Bild — wird auf deinem Gerät analysiert, nie hochgeladen.",
-      extracted: "Im Foto gefunden — erst einen Chip anklicken, dann ins Foto klicken, um die Farbe anzupassen.",
+      extracted: "Im Foto gefunden — Klick auf Chip oder Foto öffnet die große Ansicht zum Anpassen.",
       pickHint: "Jetzt irgendwo ins Foto klicken, um die Farbe zu übernehmen.",
+      modalPick: "Erst einen Chip wählen, dann ins Foto klicken.",
+      done: "Fertig",
       analysing: "Foto wird analysiert…",
       imgError: "Bild konnte nicht gelesen werden",
       chipTitle: "klicken, dann Farbe im Foto wählen",
@@ -577,20 +581,44 @@ function renderDirection() {
   directionNote.textContent = L().dirs[state.dir];
 }
 
-function renderPhotoChips() {
-  if (!state.photoCores) { photoResult.hidden = true; return; }
-  photoResult.hidden = false;
-  const hasImg = Boolean(photoCanvas && photoThumb.getAttribute("src"));
-  photoThumb.style.display = hasImg ? "" : "none";
-  photoThumb.classList.toggle("pickable", hasImg && state.armedChip !== null);
-  $("photoHint").textContent =
-    hasImg && state.armedChip !== null ? L().ui.pickHint : L().ui.extracted;
-  photoChips.innerHTML = state.photoCores.map((c, i) => {
+function chipsHTML(hasImg) {
+  return state.photoCores.map((c, i) => {
     const hex = hslToHex(c);
     const armed = state.armedChip === i;
     const title = hasImg ? L().ui.chipTitle : L().ui.chipTitleNoImg;
     return `<button data-chip="${i}" class="${armed ? "armed" : ""}" style="background:${hex}" title="${hex} — ${title}" aria-label="${hex}" aria-pressed="${armed}"></button>`;
   }).join("");
+}
+
+function renderPhotoChips() {
+  if (!state.photoCores) { photoResult.hidden = true; return; }
+  photoResult.hidden = false;
+  const hasImg = Boolean(photoCanvas && photoThumb.getAttribute("src"));
+  photoThumb.style.display = hasImg ? "" : "none";
+  $("photoHint").textContent = L().ui.extracted;
+  photoChips.innerHTML = chipsHTML(hasImg);
+
+  /* large picking view */
+  const modal = $("photoModal");
+  if (!modal.hidden && state.photoCores) {
+    $("modalChips").innerHTML = chipsHTML(true);
+    $("modalHint").textContent = state.armedChip !== null ? L().ui.pickHint : L().ui.modalPick;
+    $("photoModalImg").classList.toggle("armed", state.armedChip !== null);
+  }
+}
+
+function openPhotoModal() {
+  if (!photoCanvas || !photoThumb.getAttribute("src")) return;
+  $("photoModalImg").src = photoThumb.getAttribute("src");
+  if (state.armedChip === null) state.armedChip = 2; // pop is the usual fix
+  $("photoModal").hidden = false;
+  renderPhotoChips();
+}
+
+function closePhotoModal() {
+  $("photoModal").hidden = true;
+  state.armedChip = null;
+  renderAll();
 }
 
 /* Static text carrying data-i18n / data-i18n-title attributes */
@@ -786,10 +814,14 @@ function handlePhoto(file) {
   img.src = url;
 }
 
-/* click-to-pick: arm a chip, then pull the colour from the photo */
-photoThumb.addEventListener("click", e => {
+/* the small thumbnail opens the large picking view */
+photoThumb.addEventListener("click", openPhotoModal);
+
+/* click-to-pick inside the large view */
+$("photoModalImg").addEventListener("click", e => {
   if (!photoCanvas || state.armedChip === null || !state.photoCores) return;
-  const r = photoThumb.getBoundingClientRect();
+  const img = e.currentTarget;
+  const r = img.getBoundingClientRect();
   const c = samplePhotoAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
   if (!c) return;
   const i = state.armedChip;
@@ -798,6 +830,14 @@ photoThumb.addEventListener("click", e => {
   delete state.bright[i];
   showToast(`${hslToHex(c)} ✓`);
   renderAll();
+});
+
+$("modalClose").addEventListener("click", closePhotoModal);
+$("photoModal").addEventListener("click", e => {
+  if (e.target === e.currentTarget) closePhotoModal();
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && !$("photoModal").hidden) closePhotoModal();
 });
 
 /* ================================================================
@@ -893,14 +933,16 @@ document.addEventListener("click", e => {
   if (chip) {
     const i = +chip.dataset.chip;
     if (photoCanvas && photoThumb.getAttribute("src")) {
-      /* arm / disarm for click-to-pick */
-      state.armedChip = state.armedChip === i ? null : i;
+      /* arm this chip and make sure the large picking view is open */
+      state.armedChip = i;
+      if ($("photoModal").hidden) openPhotoModal();
+      else renderPhotoChips();
     } else if (state.photoCores) {
       /* no image available (restored from a share link): use as base */
       const c = state.photoCores[i];
       state.h = c.h; state.s = c.s; state.l = c.l;
+      renderAll();
     }
-    renderAll();
   }
 });
 
