@@ -13,8 +13,17 @@ the way interior designers work:
   (dim/north-facing, average, bright/south-facing).
 - **LRV badges** — every swatch shows its Light Reflectance Value
   (the 0–100 scale printed on paint chips) plus a warm/cool undertone badge.
-- **Tint & shade ladders** — 7 lightness steps under every swatch,
-  click any step to copy its hex.
+- **Brightness ladders** — 7 lightness steps under every swatch; click a
+  step to use that brightness for the role, and the swatch, 60-30-10 bar
+  and room illustration repaint with the exact chosen colour (click again
+  to reset). The room's big pieces always wear the palette colours
+  exactly as shown.
+- **Photo palettes** — upload a photo of a room, rug or artwork and the
+  app extracts the base colour (largest surface), a supporting mid-tone
+  and the pop/contrast colour via k-means clustering, entirely on-device
+  (nothing is uploaded). The result appears as an extra "From your photo"
+  mood, and the extracted chips can be clicked to re-base the classic
+  harmonies.
 - **Shareable URLs** — the palette is encoded in the query string
   (`?c=C46A2B&m=complementary&d=bright`).
 - **English & German** — a language switcher in the header; the default

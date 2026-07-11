@@ -58,6 +58,19 @@
         <input type="text" id="hexInput" spellcheck="false" autocomplete="off" placeholder="#3A7D6B" maxlength="7">
         <button id="randomBtn" class="ghost-btn" data-i18n="surprise" data-i18n-title="randomTitle">Surprise me</button>
       </div>
+
+      <div class="upload-row">
+        <label class="ghost-btn upload-btn" for="photoInput" data-i18n="upload">Upload a photo</label>
+        <input type="file" id="photoInput" accept="image/*" hidden>
+        <p class="hint" data-i18n="uploadHint">A room, a rug, a painting — analysed on your device, never uploaded.</p>
+      </div>
+      <div id="photoResult" class="photo-result" hidden>
+        <img id="photoThumb" alt="">
+        <div class="photo-found">
+          <p class="hint" data-i18n="extracted">Found in your photo — click a chip to use it as your base colour.</p>
+          <div id="photoChips" class="photo-chips"></div>
+        </div>
+      </div>
     </div>
 
     <div class="card">

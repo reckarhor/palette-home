@@ -104,11 +104,18 @@ const I18N = {
       linkCopied: "Palette link copied",
       badHex: "Not a valid hex colour",
       copyFail: "Couldn't copy — select it manually",
-      ladderTitle: "Tints & shades — click any step to copy",
-      clickToCopy: "click to copy",
+      ladderTitle: "Brightness — click a step to use it in the palette and room",
+      setBright: "use this brightness",
+      resetBright: "click again to reset",
       wallTint: "wall-ready tint",
       modeGroup: "Colour harmony",
-      lightGroup: "Room light"
+      lightGroup: "Room light",
+      upload: "Upload a photo",
+      uploadHint: "A room, a rug, a painting — analysed on your device, never uploaded.",
+      extracted: "Found in your photo — click a chip to use it as your base colour.",
+      analysing: "Analysing photo…",
+      imgError: "Couldn't read that image",
+      chipTitle: "use as base colour"
     },
     temps: { warm: "Warm", cool: "Cool", neutral: "Neutral" },
     roles: {
@@ -126,7 +133,7 @@ const I18N = {
       neutral: "Your base is close to neutral — it will take on the temperature of whatever you put next to it, so commit to warm or cool in your accents."
     },
     roomCaption: (wallHex, multi) =>
-      `Walls in the wall-ready tint ${wallHex}, sofa in your secondary, cushions, lamp and art in your accent${multi ? "s" : ""}.`,
+      `Walls in the wall-ready tint ${wallHex}, sofa in your secondary, cushions, lamp and art in your accent${multi ? "s" : ""}. Pick a brightness step under any swatch to repaint the room with it.`,
     modes: {
       analogous: {
         name: "Calm & cohesive", sub: "Analogous — neighbouring hues",
@@ -157,6 +164,11 @@ const I18N = {
         name: "Tone-on-tone", sub: "Monochromatic — one hue, many depths",
         why: "One hue at different depths always matches itself. Texture — linen, wood, wool, matte and gloss paint — does the work that colour contrast would normally do.",
         tip: "Push the extremes: the palest tint on walls and the deepest shade on one anchor piece stop a tone-on-tone room feeling like a paint chip."
+      },
+      photo: {
+        name: "From your photo", sub: "Extracted — base, supporting & pop colour",
+        why: "These are the colours actually living in your photo: the base covering the biggest area, a supporting mid-tone, and the most striking pop colour. Schemes taken from an image you love almost always feel right — its maker already balanced them.",
+        tip: "Fine-tune with the brightness ladders — extracted colours often want a lighter wall tint or a deeper accent before they work as paint."
       }
     },
     dirs: {
@@ -195,11 +207,18 @@ const I18N = {
       linkCopied: "Palettenlink kopiert",
       badHex: "Kein gültiger Hex-Farbwert",
       copyFail: "Kopieren fehlgeschlagen — bitte manuell markieren",
-      ladderTitle: "Auf- und Abtönungen — Klick kopiert den Farbwert",
-      clickToCopy: "Klick kopiert",
+      ladderTitle: "Helligkeit — Klick übernimmt die Stufe in Palette und Raum",
+      setBright: "diese Helligkeit verwenden",
+      resetBright: "erneut klicken setzt zurück",
       wallTint: "Wandton",
       modeGroup: "Farbharmonie",
-      lightGroup: "Raumlicht"
+      lightGroup: "Raumlicht",
+      upload: "Foto hochladen",
+      uploadHint: "Ein Raum, ein Teppich, ein Bild — wird auf deinem Gerät analysiert, nie hochgeladen.",
+      extracted: "Im Foto gefunden — Klick macht die Farbe zur Basis.",
+      analysing: "Foto wird analysiert…",
+      imgError: "Bild konnte nicht gelesen werden",
+      chipTitle: "als Basisfarbe verwenden"
     },
     temps: { warm: "Warm", cool: "Kühl", neutral: "Neutral" },
     roles: {
@@ -217,7 +236,7 @@ const I18N = {
       neutral: "Deine Basisfarbe ist fast neutral — sie nimmt die Temperatur ihrer Umgebung an; entscheide dich bei den Akzenten klar für warm oder kühl."
     },
     roomCaption: (wallHex, multi) =>
-      `Wände im Wandton ${wallHex}, Sofa in der Zweitfarbe, Kissen, Lampe und Kunst ${multi ? "in den Akzenten" : "im Akzent"}.`,
+      `Wände im Wandton ${wallHex}, Sofa in der Zweitfarbe, Kissen, Lampe und Kunst ${multi ? "in den Akzenten" : "im Akzent"}. Wähle unter einem Farbfeld eine Helligkeitsstufe, um den Raum damit umzustreichen.`,
     modes: {
       analogous: {
         name: "Ruhig & harmonisch", sub: "Analog — benachbarte Farbtöne",
@@ -248,6 +267,11 @@ const I18N = {
         name: "Ton in Ton", sub: "Monochromatisch — ein Farbton, viele Tiefen",
         why: "Ein Farbton in verschiedenen Tiefen passt immer zu sich selbst. Textur — Leinen, Holz, Wolle, matte und glänzende Farbe — übernimmt die Arbeit, die sonst der Farbkontrast leistet.",
         tip: "Geh an die Extreme: der blasseste Ton an die Wände, der tiefste auf ein Ankermöbel — so wirkt Ton in Ton nicht wie eine Farbkarte."
+      },
+      photo: {
+        name: "Aus deinem Foto", sub: "Erkannt — Basis-, Zweit- und Akzentfarbe",
+        why: "Das sind die Farben, die wirklich in deinem Foto stecken: die flächige Basisfarbe, ein tragender Mittelton und die auffälligste Akzentfarbe. Schemata aus einer geliebten Vorlage wirken fast immer stimmig — die Balance stimmt schon.",
+        tip: "Feinjustiere mit den Helligkeitsleitern — erkannte Farben brauchen als Wandfarbe oft einen helleren Ton oder als Akzent einen tieferen."
       }
     },
     dirs: {
@@ -270,18 +294,31 @@ const MODES = [
   { id: "tetradic",      angles: [0, 60, 180, 240] },
   { id: "mono",          angles: [0] }
 ];
+const PHOTO_MODE = { id: "photo", angles: [] };
 
+/* Wall tint: follows the dominant's chosen lightness, clamped so the
+   advice for the room's light still holds. Without a user override the
+   defaults match the original recommendations. */
 const DIRECTIONS = {
-  dim:    { wall: c => ({ h: c.h, s: Math.min(c.s, 26), l: 86 }) },
-  avg:    { wall: c => ({ h: c.h, s: Math.min(c.s, 32), l: 80 }) },
-  bright: { wall: c => ({ h: c.h, s: Math.min(c.s, 40), l: 71 }) }
+  dim:    { satCap: 26, defaultL: 86, floorL: 78 },
+  avg:    { satCap: 32, defaultL: 80, floorL: 70 },
+  bright: { satCap: 40, defaultL: 71, floorL: 55 }
 };
+
+function wallTintOf(dom, dirKey, hasOverride) {
+  const d = DIRECTIONS[dirKey];
+  const l = hasOverride ? clamp(dom.l, d.floorL, 92) : d.defaultL;
+  return { h: dom.h, s: Math.min(dom.s, d.satCap), l };
+}
 
 /* ================================================================
    Palette construction
    ================================================================ */
 
 function buildCores(base, mode) {
+  if (mode.id === "photo" && state.photoCores) {
+    return state.photoCores.map(c => ({ ...c }));
+  }
   if (mode.id === "mono") {
     return [
       { h: base.h, s: base.s * 0.6, l: clamp(base.l + 28, 60, 88) },
@@ -293,8 +330,7 @@ function buildCores(base, mode) {
 }
 
 /* Map core colours onto decor roles (60 / 30 / 10) */
-function assignRoles(cores, mode, dirKey) {
-  const wall = DIRECTIONS[dirKey].wall(cores[0]);
+function assignRoles(cores, mode) {
   const roles = [];
   const push = (roleKey, share, colour) => roles.push({ roleKey, share, colour });
 
@@ -317,13 +353,24 @@ function assignRoles(cores, mode, dirKey) {
     push("accent6", 6, cores[1]);
     push("accent4", 4, cores[3]);
   }
-
-  return { roles, wall };
+  return roles;
 }
 
+const LADDER_STEPS = [92, 81, 69, 57, 45, 33, 21];
+function ladderSat(s, l) { return s * (l > 75 ? 0.7 : l < 30 ? 0.9 : 1); }
 function ladderOf(c) {
-  const steps = [92, 81, 69, 57, 45, 33, 21];
-  return steps.map(l => ({ h: c.h, s: c.s * (l > 75 ? 0.7 : l < 30 ? 0.9 : 1), l }));
+  return LADDER_STEPS.map(l => ({ h: c.h, s: ladderSat(c.s, l), l }));
+}
+
+/* user-selected brightness per role slot */
+function applyBrightness(roles) {
+  roles.forEach((r, i) => {
+    const l = state.bright[i];
+    if (l !== undefined) {
+      r.colour = { h: r.colour.h, s: ladderSat(r.colour.s, l), l };
+      r.brightSet = true;
+    }
+  });
 }
 
 /* ================================================================
@@ -334,12 +381,15 @@ const state = {
   h: 165, s: 55, l: 42,
   mode: "split",
   dir: "avg",
-  lang: "en"
+  lang: "en",
+  bright: {},          // role index -> selected ladder lightness
+  photoCores: null     // [{h,s,l} x3] extracted from an uploaded photo
 };
 
 function L() { return I18N[state.lang]; }
 function baseColour() { return { h: state.h, s: state.s, l: state.l }; }
-function currentMode() { return MODES.find(m => m.id === state.mode); }
+function activeModes() { return state.photoCores ? [PHOTO_MODE, ...MODES] : MODES; }
+function currentMode() { return activeModes().find(m => m.id === state.mode) || MODES[2]; }
 
 /* ================================================================
    DOM refs
@@ -353,6 +403,7 @@ const swatchesEl = $("swatches"), modeBlurb = $("modeBlurb");
 const ratioBar = $("ratioBar"), ratioLegend = $("ratioLegend");
 const whyText = $("whyText"), tipList = $("tipList"), roomCaption = $("roomCaption");
 const toast = $("toast"), langSwitch = $("langSwitch");
+const photoInput = $("photoInput"), photoResult = $("photoResult"), photoThumb = $("photoThumb"), photoChips = $("photoChips");
 
 /* ================================================================
    Rendering
@@ -395,16 +446,19 @@ function renderWheel(cores) {
     `linear-gradient(to right, #000, hsl(${state.h} ${state.s}% 50%), #fff)`;
 }
 
-function swatchHTML(role) {
+function swatchHTML(role, idx) {
   const hex = hslToHex(role.colour);
   const txt = textOn(role.colour);
   const lrv = lrvOf(role.colour);
   const temp = L().temps[warmCool(role.colour)];
   const roleTxt = L().roles[role.roleKey];
+  const selL = state.bright[idx];
   const ladder = ladderOf(role.colour)
     .map(s => {
       const h = hslToHex(s);
-      return `<button data-copy="${h}" style="background:${h}" title="${h} · LRV ${lrvOf(s)} — ${L().ui.clickToCopy}" aria-label="${h}"></button>`;
+      const sel = selL === s.l;
+      const hint = sel ? L().ui.resetBright : L().ui.setBright;
+      return `<button data-bl="${s.l}" data-role="${idx}" class="${sel ? "sel" : ""}" style="background:${h}" title="${h} · LRV ${lrvOf(s)} — ${hint}" aria-label="${h}" aria-pressed="${sel}"></button>`;
     }).join("");
   return `
   <div class="swatch">
@@ -445,7 +499,7 @@ function renderRatio(roles) {
 function renderRoom(roles, wall) {
   const g = id => document.getElementById(id);
   const dom = roles[0].colour, sec = roles[1].colour, acc = roles[2].colour;
-  const acc2 = roles[3] ? roles[3].colour : { h: dom.h, s: dom.s, l: clamp(dom.l - 18, 12, 55) };
+  const acc2 = roles[3] ? roles[3].colour : acc;
 
   const fill = (id, c) => { const el = g(id); if (el) el.setAttribute("fill", typeof c === "string" ? c : hslToHex(c)); };
 
@@ -464,14 +518,15 @@ function renderRoom(roles, wall) {
   fill("rmArtShape1", acc);
   fill("rmArtShape2", sec);
 
-  fill("rmRug", { h: sec.h, s: sec.s * 0.35, l: 80 });
+  fill("rmRug", { h: sec.h, s: sec.s * 0.35, l: clamp(sec.l + 35, 60, 88) });
 
+  /* the big pieces wear the palette colours exactly as shown in the swatches */
   fill("rmSofaBack", sec);
   fill("rmSofaArmL", sec);
   fill("rmSofaArmR", sec);
-  fill("rmSofaSeat", { h: sec.h, s: sec.s, l: clamp(sec.l - 9, 10, 80) });
+  fill("rmSofaSeat", sec);
   fill("rmCushion1", acc);
-  fill("rmCushion2", { h: acc.h, s: acc.s * 0.8, l: clamp(acc.l + 22, 20, 88) });
+  fill("rmCushion2", dom);
   fill("rmCushion3", acc2);
 
   fill("rmTableTop", "#8A6A48");
@@ -484,7 +539,7 @@ function renderRoom(roles, wall) {
   fill("rmLeaf2", "#5D8F57");
   fill("rmLeaf3", "#3F6B45");
   fill("rmPot", acc2);
-  fill("rmVase", { h: acc.h, s: acc.s * 0.7, l: clamp(acc.l + 15, 25, 85) });
+  fill("rmVase", acc);
 
   roomCaption.textContent = L().roomCaption(hslToHex(wall), Boolean(roles[3]));
 }
@@ -498,7 +553,7 @@ function renderWhy() {
 }
 
 function renderModeList(base) {
-  modeList.innerHTML = MODES.map(m => {
+  modeList.innerHTML = activeModes().map(m => {
     const txt = L().modes[m.id];
     const dots = buildCores(base, m).map(c =>
       `<span style="background:${hslToHex(c)}"></span>`).join("");
@@ -515,6 +570,16 @@ function renderDirection() {
   directionSeg.querySelectorAll("button").forEach(b =>
     b.setAttribute("aria-checked", String(b.dataset.dir === state.dir)));
   directionNote.textContent = L().dirs[state.dir];
+}
+
+function renderPhotoChips() {
+  if (!state.photoCores) { photoResult.hidden = true; return; }
+  photoResult.hidden = false;
+  photoThumb.style.display = photoThumb.getAttribute("src") ? "" : "none";
+  photoChips.innerHTML = state.photoCores.map(c => {
+    const hex = hslToHex(c);
+    return `<button data-chip="${hex}" style="background:${hex}" title="${hex} — ${L().ui.chipTitle}" aria-label="${hex}"></button>`;
+  }).join("");
 }
 
 /* Static text carrying data-i18n / data-i18n-title attributes */
@@ -540,7 +605,10 @@ function applyStatic() {
 
 function syncURL() {
   const hex = hslToHex(baseColour()).slice(1);
-  const q = `?c=${hex}&m=${state.mode}&d=${state.dir}`;
+  let q = `?c=${hex}&m=${state.mode}&d=${state.dir}`;
+  const b = Object.entries(state.bright).map(([i, l]) => `${i}-${l}`).join(".");
+  if (b) q += `&b=${b}`;
+  if (state.photoCores) q += `&p=${state.photoCores.map(c => hslToHex(c).slice(1)).join(",")}`;
   history.replaceState(null, "", q);
 }
 
@@ -548,7 +616,9 @@ function renderAll() {
   const base = baseColour();
   const mode = currentMode();
   const cores = buildCores(base, mode);
-  const { roles, wall } = assignRoles(cores, mode, state.dir);
+  const roles = assignRoles(cores, mode);
+  applyBrightness(roles);
+  const wall = wallTintOf(roles[0].colour, state.dir, roles[0].brightSet);
 
   renderWheel(cores);
   renderModeList(base);
@@ -557,7 +627,109 @@ function renderAll() {
   renderRatio(roles);
   renderRoom(roles, wall);
   renderWhy();
+  renderPhotoChips();
   syncURL();
+}
+
+/* ================================================================
+   Photo colour extraction (all on-device: downscale + k-means,
+   then pick base / supporting / pop clusters)
+   ================================================================ */
+
+function extractPalette(imgSource) {
+  const size = 120;
+  const cv = document.createElement("canvas");
+  const w = imgSource.width, h = imgSource.height;
+  const scale = Math.min(size / w, size / h, 1);
+  cv.width = Math.max(1, Math.round(w * scale));
+  cv.height = Math.max(1, Math.round(h * scale));
+  const cx = cv.getContext("2d", { willReadFrequently: true });
+  cx.drawImage(imgSource, 0, 0, cv.width, cv.height);
+  const data = cx.getImageData(0, 0, cv.width, cv.height).data;
+
+  const px = [];
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] > 200) px.push([data[i], data[i + 1], data[i + 2]]);
+  }
+  if (px.length < 20) return null;
+
+  /* k-means, k=6, seeded by spreading over the pixel list */
+  const k = 6;
+  let centers = [];
+  for (let i = 0; i < k; i++) centers.push([...px[Math.floor((i + 0.5) * px.length / k)]]);
+  let counts = new Array(k).fill(0);
+
+  for (let iter = 0; iter < 12; iter++) {
+    const sum = Array.from({ length: k }, () => [0, 0, 0]);
+    counts = new Array(k).fill(0);
+    for (const p of px) {
+      let bi = 0, bd = Infinity;
+      for (let c = 0; c < k; c++) {
+        const d = (p[0] - centers[c][0]) ** 2 + (p[1] - centers[c][1]) ** 2 + (p[2] - centers[c][2]) ** 2;
+        if (d < bd) { bd = d; bi = c; }
+      }
+      counts[bi]++;
+      sum[bi][0] += p[0]; sum[bi][1] += p[1]; sum[bi][2] += p[2];
+    }
+    for (let c = 0; c < k; c++) {
+      if (counts[c] > 0) centers[c] = sum[c].map(v => v / counts[c]);
+    }
+  }
+
+  const clusters = centers
+    .map((c, i) => ({ hsl: rgbToHsl(c[0], c[1], c[2]), share: counts[i] / px.length }))
+    .filter(c => c.share > 0.01)
+    .sort((a, b) => b.share - a.share);
+  if (!clusters.length) return null;
+
+  const hueDist = (a, b) => { const d = Math.abs(a - b) % 360; return Math.min(d, 360 - d); };
+  const colourDist = (a, b) =>
+    hueDist(a.h, b.h) * (Math.min(a.s, b.s) / 100) + Math.abs(a.l - b.l) * 0.6 + Math.abs(a.s - b.s) * 0.3;
+
+  /* base: the biggest surface in the photo */
+  const base = clusters[0].hsl;
+
+  /* pop: saturated, sizable enough to matter, far from the base */
+  let pop = null, popScore = -1;
+  for (const c of clusters) {
+    if (c === clusters[0]) continue;
+    const score = (c.hsl.s / 100) * (0.35 + hueDist(c.hsl.h, base.h) / 180) * Math.sqrt(c.share)
+      * (c.hsl.l > 8 && c.hsl.l < 92 ? 1 : 0.2);
+    if (score > popScore) { popScore = score; pop = c.hsl; }
+  }
+  if (!pop) pop = { h: mod360(base.h + 180), s: Math.max(base.s, 45), l: 45 };
+
+  /* supporting: next-largest cluster distinct from both */
+  let mid = null;
+  for (const c of clusters.slice(1)) {
+    if (colourDist(c.hsl, pop) < 18) continue;
+    if (colourDist(c.hsl, base) < 14) continue;
+    mid = c.hsl; break;
+  }
+  if (!mid) mid = { h: base.h, s: Math.min(base.s + 10, 90), l: clamp(base.l - 18, 15, 60) };
+
+  const norm = c => ({ h: Math.round(c.h), s: Math.round(clamp(c.s, 3, 95)), l: Math.round(clamp(c.l, 6, 94)) });
+  return [norm(base), norm(mid), norm(pop)];
+}
+
+function handlePhoto(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  showToast(L().ui.analysing);
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    const cores = extractPalette(img);
+    if (!cores) { showToast(L().ui.imgError); URL.revokeObjectURL(url); return; }
+    photoThumb.src = url; // kept alive for the thumbnail
+    state.photoCores = cores;
+    state.mode = "photo";
+    state.bright = {};
+    /* base colour follows the photo so the classic moods riff on it too */
+    state.h = cores[0].h; state.s = cores[0].s; state.l = cores[0].l;
+    renderAll();
+  };
+  img.onerror = () => { showToast(L().ui.imgError); URL.revokeObjectURL(url); };
+  img.src = url;
 }
 
 /* ================================================================
@@ -621,6 +793,7 @@ modeList.addEventListener("click", e => {
   const btn = e.target.closest("[data-mode]");
   if (!btn) return;
   state.mode = btn.dataset.mode;
+  state.bright = {}; // roles change meaning, drop brightness picks
   renderAll();
 });
 
@@ -631,10 +804,29 @@ directionSeg.addEventListener("click", e => {
   renderAll();
 });
 
-/* copy buttons (swatches + ladders) */
+photoInput.addEventListener("change", () => handlePhoto(photoInput.files[0]));
+
+/* swatch copy buttons, brightness ladders and photo chips */
 document.addEventListener("click", e => {
-  const btn = e.target.closest("[data-copy]");
-  if (btn) copyText(btn.dataset.copy);
+  const copyBtn = e.target.closest("[data-copy]");
+  if (copyBtn) { copyText(copyBtn.dataset.copy); return; }
+
+  const step = e.target.closest("[data-bl]");
+  if (step) {
+    const idx = +step.dataset.role;
+    const l = +step.dataset.bl;
+    if (state.bright[idx] === l) delete state.bright[idx];
+    else state.bright[idx] = l;
+    renderAll();
+    return;
+  }
+
+  const chip = e.target.closest("[data-chip]");
+  if (chip) {
+    const hsl = rgbToHsl(...hexToRgb(chip.dataset.chip));
+    state.h = hsl.h; state.s = hsl.s; state.l = hsl.l;
+    renderAll();
+  }
 });
 
 $("shareBtn").addEventListener("click", () => {
@@ -671,13 +863,31 @@ applyTheme(localStorage.getItem("ph-theme") ||
 
 (function init() {
   const q = new URLSearchParams(location.search);
+
+  if (q.get("p")) {
+    const cores = q.get("p").split(",").map(hexToRgb);
+    if (cores.length === 3 && cores.every(Boolean)) {
+      state.photoCores = cores.map(rgb => {
+        const c = rgbToHsl(...rgb);
+        return { h: Math.round(c.h), s: Math.round(c.s), l: Math.round(c.l) };
+      });
+    }
+  }
+
   const rgb = q.get("c") ? hexToRgb("#" + q.get("c").replace("#", "")) : null;
   if (rgb) {
     const hsl = rgbToHsl(...rgb);
     state.h = hsl.h; state.s = hsl.s; state.l = hsl.l;
   }
-  if (q.get("m") && MODES.some(m => m.id === q.get("m"))) state.mode = q.get("m");
+  if (q.get("m") && activeModes().some(m => m.id === q.get("m"))) state.mode = q.get("m");
   if (q.get("d") && DIRECTIONS[q.get("d")]) state.dir = q.get("d");
+
+  if (q.get("b")) {
+    q.get("b").split(".").forEach(pair => {
+      const [i, l] = pair.split("-").map(Number);
+      if (Number.isInteger(i) && i >= 0 && i < 4 && LADDER_STEPS.includes(l)) state.bright[i] = l;
+    });
+  }
 
   const saved = localStorage.getItem("ph-lang");
   const device = (navigator.language || "").toLowerCase().startsWith("de") ? "de" : "en";
