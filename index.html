@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palette Home — colour schemes for real rooms</title>
+<meta name="description" content="Pick a colour, choose a mood, and get a decor-ready palette with wall, furniture and accent roles assigned.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <div>
+      <h1>Palette Home</h1>
+      <p class="tagline">Colour schemes for real rooms</p>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button id="shareBtn" class="ghost-btn" title="Copy a shareable link to this palette">Share palette</button>
+    <button id="themeToggle" class="ghost-btn icon-btn" title="Toggle light / dark mode" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main class="layout">
+
+  <!-- ============ LEFT: CONTROLS ============ -->
+  <section class="panel controls">
+
+    <div class="card">
+      <h2 class="card-title">1 · Pick your colour</h2>
+      <div class="wheel-wrap">
+        <div id="wheel" class="wheel">
+          <div class="wheel-ring" aria-hidden="true"></div>
+          <svg id="wheelOverlay" class="wheel-overlay" viewBox="0 0 280 280" aria-hidden="true"></svg>
+          <div id="wheelCenter" class="wheel-center">
+            <span id="centerHex">#000000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="slider-row">
+        <label for="satSlider">Saturation</label>
+        <input type="range" id="satSlider" min="0" max="100" value="65">
+      </div>
+      <div class="slider-row">
+        <label for="lightSlider">Lightness</label>
+        <input type="range" id="lightSlider" min="5" max="95" value="50">
+      </div>
+
+      <div class="hex-row">
+        <label for="hexInput" class="visually-hidden">Hex colour</label>
+        <input type="text" id="hexInput" spellcheck="false" autocomplete="off" placeholder="#3A7D6B" maxlength="7">
+        <button id="randomBtn" class="ghost-btn" title="Try a random starting colour">Surprise me</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">2 · Pick a mood</h2>
+      <div id="modeList" class="mode-list" role="radiogroup" aria-label="Colour harmony"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">3 · Your room's light</h2>
+      <div id="directionSeg" class="segmented" role="radiogroup" aria-label="Room light">
+        <button data-dir="dim"   role="radio">Dim / north-facing</button>
+        <button data-dir="avg"   role="radio">Average light</button>
+        <button data-dir="bright" role="radio">Bright / south-facing</button>
+      </div>
+      <p id="directionNote" class="hint"></p>
+    </div>
+
+  </section>
+
+  <!-- ============ RIGHT: RESULTS ============ -->
+  <section class="panel results">
+
+    <div class="card">
+      <div class="card-head">
+        <h2 class="card-title" id="paletteTitle">Your palette</h2>
+        <p id="modeBlurb" class="mode-blurb"></p>
+      </div>
+      <div id="swatches" class="swatches"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">The 60-30-10 balance</h2>
+      <p class="hint">Interior designers split a room roughly 60% dominant (walls, big pieces), 30% secondary (sofa, curtains), 10% accent (cushions, art, lamps).</p>
+      <div id="ratioBar" class="ratio-bar" aria-hidden="true"></div>
+      <div id="ratioLegend" class="ratio-legend"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">In a room</h2>
+      <svg id="roomScene" viewBox="0 0 640 420" role="img" aria-label="Illustration of a living room recoloured with your palette">
+        <!-- wall & floor -->
+        <rect id="rmWall" x="0" y="0" width="640" height="310"/>
+        <rect id="rmFloor" x="0" y="310" width="640" height="110"/>
+        <rect id="rmSkirting" x="0" y="298" width="640" height="14"/>
+        <!-- window -->
+        <g id="rmWindow">
+          <rect id="rmWinFrame" x="52" y="46" width="130" height="170" rx="4"/>
+          <rect id="rmWinPane" x="62" y="56" width="110" height="150"/>
+          <line id="rmWinBar1" x1="117" y1="56" x2="117" y2="206"/>
+          <line id="rmWinBar2" x1="62" y1="131" x2="172" y2="131"/>
+        </g>
+        <!-- art -->
+        <g id="rmArt">
+          <rect id="rmArtFrame" x="300" y="52" width="118" height="92" rx="3"/>
+          <rect id="rmArtMat" x="308" y="60" width="102" height="76"/>
+          <circle id="rmArtShape1" cx="342" cy="96" r="22"/>
+          <rect id="rmArtShape2" x="362" y="84" width="34" height="40" rx="2"/>
+        </g>
+        <!-- rug -->
+        <ellipse id="rmRug" cx="400" cy="382" rx="205" ry="30"/>
+        <!-- sofa -->
+        <g id="rmSofa">
+          <rect id="rmSofaBack" x="300" y="188" width="220" height="80" rx="14"/>
+          <rect id="rmSofaSeat" x="288" y="252" width="244" height="66" rx="16"/>
+          <rect id="rmSofaArmL" x="278" y="216" width="34" height="96" rx="14"/>
+          <rect id="rmSofaArmR" x="508" y="216" width="34" height="96" rx="14"/>
+          <rect id="rmCushion1" x="322" y="216" width="52" height="46" rx="8"/>
+          <rect id="rmCushion2" x="384" y="216" width="52" height="46" rx="8"/>
+          <rect id="rmCushion3" x="446" y="216" width="52" height="46" rx="8"/>
+        </g>
+        <!-- side table + lamp -->
+        <g id="rmLampGroup">
+          <rect id="rmTableTop" x="180" y="272" width="80" height="10" rx="3"/>
+          <rect id="rmTableLeg1" x="190" y="282" width="8" height="46"/>
+          <rect id="rmTableLeg2" x="242" y="282" width="8" height="46"/>
+          <rect id="rmLampStand" x="216" y="222" width="7" height="50"/>
+          <path id="rmLampShade" d="M196 224 L243 224 L235 190 L204 190 Z"/>
+        </g>
+        <!-- plant -->
+        <g id="rmPlant">
+          <path id="rmLeaf1" d="M592 250 q-18 -46 4 -74 q20 30 6 74 Z"/>
+          <path id="rmLeaf2" d="M584 254 q-34 -28 -30 -60 q32 12 40 56 Z"/>
+          <path id="rmLeaf3" d="M600 254 q34 -28 30 -60 q-32 12 -40 56 Z"/>
+          <path id="rmPot" d="M568 252 L616 252 L608 318 L576 318 Z"/>
+        </g>
+        <!-- vase on table -->
+        <path id="rmVase" d="M162 328 q-10 -26 6 -40 q16 14 6 40 Z" transform="translate(70 -46)"/>
+      </svg>
+      <p id="roomCaption" class="hint"></p>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Why these colours work</h2>
+      <p id="whyText" class="why-text"></p>
+      <ul id="tipList" class="tip-list"></ul>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>All colour maths runs in your browser — nothing is uploaded or tracked. LRV = Light Reflectance Value (0 dark – 100 light).</p>
+</footer>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
