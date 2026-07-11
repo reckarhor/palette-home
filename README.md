@@ -20,10 +20,15 @@ the way interior designers work:
   exactly as shown.
 - **Photo palettes** — upload a photo of a room, rug or artwork and the
   app extracts the base colour (largest surface), a supporting mid-tone
-  and the pop/contrast colour via k-means clustering, entirely on-device
-  (nothing is uploaded). The result appears as an extra "From your photo"
-  mood, and the extracted chips can be clicked to re-base the classic
-  harmonies.
+  and the pop/contrast colour, entirely on-device (nothing is uploaded).
+  Extraction uses k-means with farthest-point seeding so small but
+  chromatically distinct accents (a green lamp in a brown room) are
+  found, with pop scoring driven by saturation and hue contrast rather
+  than area. The result appears as an extra "From your photo" mood.
+- **Click-to-pick correction** — if the automatic pick isn't what you
+  meant, click a chip to arm it, then click the exact spot in the photo;
+  the colour under the cursor (5×5 average) replaces that chip and the
+  whole palette, room and share URL follow.
 - **Shareable URLs** — the palette is encoded in the query string
   (`?c=C46A2B&m=complementary&d=bright`).
 - **English & German** — a language switcher in the header; the default

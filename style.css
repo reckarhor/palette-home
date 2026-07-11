@@ -272,19 +272,24 @@ input[type="range"]::-moz-range-thumb {
 }
 .photo-result[hidden] { display: none; }
 #photoThumb {
-  width: 72px; height: 72px; object-fit: cover;
+  width: 140px; max-width: 45%; height: auto;
   border-radius: 8px; border: 1px solid var(--line);
-  flex-shrink: 0;
+  flex-shrink: 0; display: block;
 }
+#photoThumb.pickable { cursor: crosshair; box-shadow: 0 0 0 2px var(--accent-ui); }
 .photo-found { min-width: 0; }
 .photo-found .hint { margin-top: 0; }
-.photo-chips { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.photo-chips { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 .photo-chips button {
   width: 34px; height: 34px; border-radius: 50%;
   border: 2px solid var(--panel); cursor: pointer;
   box-shadow: 0 0 0 1px var(--line), 0 1px 3px rgba(0,0,0,.25);
 }
 .photo-chips button:hover { transform: scale(1.12); }
+.photo-chips button.armed {
+  box-shadow: 0 0 0 3px var(--accent-ui), 0 1px 3px rgba(0,0,0,.25);
+  transform: scale(1.12);
+}
 
 /* ============ ratio bar ============ */
 .ratio-bar {

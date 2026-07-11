@@ -112,10 +112,12 @@ const I18N = {
       lightGroup: "Room light",
       upload: "Upload a photo",
       uploadHint: "A room, a rug, a painting — analysed on your device, never uploaded.",
-      extracted: "Found in your photo — click a chip to use it as your base colour.",
+      extracted: "Found in your photo — click a chip, then click in the photo to fine-tune that colour.",
+      pickHint: "Now click anywhere in the photo to pull that colour.",
       analysing: "Analysing photo…",
       imgError: "Couldn't read that image",
-      chipTitle: "use as base colour"
+      chipTitle: "click, then pick the colour from the photo",
+      chipTitleNoImg: "use as base colour"
     },
     temps: { warm: "Warm", cool: "Cool", neutral: "Neutral" },
     roles: {
@@ -215,10 +217,12 @@ const I18N = {
       lightGroup: "Raumlicht",
       upload: "Foto hochladen",
       uploadHint: "Ein Raum, ein Teppich, ein Bild — wird auf deinem Gerät analysiert, nie hochgeladen.",
-      extracted: "Im Foto gefunden — Klick macht die Farbe zur Basis.",
+      extracted: "Im Foto gefunden — erst einen Chip anklicken, dann ins Foto klicken, um die Farbe anzupassen.",
+      pickHint: "Jetzt irgendwo ins Foto klicken, um die Farbe zu übernehmen.",
       analysing: "Foto wird analysiert…",
       imgError: "Bild konnte nicht gelesen werden",
-      chipTitle: "als Basisfarbe verwenden"
+      chipTitle: "klicken, dann Farbe im Foto wählen",
+      chipTitleNoImg: "als Basisfarbe verwenden"
     },
     temps: { warm: "Warm", cool: "Kühl", neutral: "Neutral" },
     roles: {
@@ -383,7 +387,8 @@ const state = {
   dir: "avg",
   lang: "en",
   bright: {},          // role index -> selected ladder lightness
-  photoCores: null     // [{h,s,l} x3] extracted from an uploaded photo
+  photoCores: null,    // [{h,s,l} x3] extracted from an uploaded photo
+  armedChip: null      // chip index awaiting a click in the photo
 };
 
 function L() { return I18N[state.lang]; }
@@ -575,10 +580,16 @@ function renderDirection() {
 function renderPhotoChips() {
   if (!state.photoCores) { photoResult.hidden = true; return; }
   photoResult.hidden = false;
-  photoThumb.style.display = photoThumb.getAttribute("src") ? "" : "none";
-  photoChips.innerHTML = state.photoCores.map(c => {
+  const hasImg = Boolean(photoCanvas && photoThumb.getAttribute("src"));
+  photoThumb.style.display = hasImg ? "" : "none";
+  photoThumb.classList.toggle("pickable", hasImg && state.armedChip !== null);
+  $("photoHint").textContent =
+    hasImg && state.armedChip !== null ? L().ui.pickHint : L().ui.extracted;
+  photoChips.innerHTML = state.photoCores.map((c, i) => {
     const hex = hslToHex(c);
-    return `<button data-chip="${hex}" style="background:${hex}" title="${hex} — ${L().ui.chipTitle}" aria-label="${hex}"></button>`;
+    const armed = state.armedChip === i;
+    const title = hasImg ? L().ui.chipTitle : L().ui.chipTitleNoImg;
+    return `<button data-chip="${i}" class="${armed ? "armed" : ""}" style="background:${hex}" title="${hex} — ${title}" aria-label="${hex}" aria-pressed="${armed}"></button>`;
   }).join("");
 }
 
@@ -653,10 +664,24 @@ function extractPalette(imgSource) {
   }
   if (px.length < 20) return null;
 
-  /* k-means, k=6, seeded by spreading over the pixel list */
-  const k = 6;
-  let centers = [];
-  for (let i = 0; i < k; i++) centers.push([...px[Math.floor((i + 0.5) * px.length / k)]]);
+  /* k-means, k=10, farthest-point seeding: small but chromatically
+     distinct regions (a green lamp in a brown room) get their own seed
+     instead of being absorbed into a big neutral cluster */
+  const k = Math.min(10, px.length);
+  const sub = px.filter((_, i) => i % 4 === 0);
+  const mean = sub.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0])
+    .map(v => v / sub.length);
+  const d2 = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2;
+  let centers = [mean];
+  while (centers.length < k) {
+    let best = null, bestD = -1;
+    for (const p of sub) {
+      let m = Infinity;
+      for (const c of centers) m = Math.min(m, d2(p, c));
+      if (m > bestD) { bestD = m; best = p; }
+    }
+    centers.push([...best]);
+  }
   let counts = new Array(k).fill(0);
 
   for (let iter = 0; iter < 12; iter++) {
@@ -678,7 +703,7 @@ function extractPalette(imgSource) {
 
   const clusters = centers
     .map((c, i) => ({ hsl: rgbToHsl(c[0], c[1], c[2]), share: counts[i] / px.length }))
-    .filter(c => c.share > 0.01)
+    .filter(c => c.share > 0.004)
     .sort((a, b) => b.share - a.share);
   if (!clusters.length) return null;
 
@@ -689,12 +714,16 @@ function extractPalette(imgSource) {
   /* base: the biggest surface in the photo */
   const base = clusters[0].hsl;
 
-  /* pop: saturated, sizable enough to matter, far from the base */
+  /* pop: the most chromatic voice in the photo — saturation and hue
+     contrast against the base dominate; area barely matters as long as
+     the colour is really there (share^0.2, floor 0.4%) */
   let pop = null, popScore = -1;
   for (const c of clusters) {
     if (c === clusters[0]) continue;
-    const score = (c.hsl.s / 100) * (0.35 + hueDist(c.hsl.h, base.h) / 180) * Math.sqrt(c.share)
-      * (c.hsl.l > 8 && c.hsl.l < 92 ? 1 : 0.2);
+    if (c.hsl.l < 10 || c.hsl.l > 92) continue;
+    const score = Math.pow(c.hsl.s / 100, 1.3)
+      * (0.3 + hueDist(c.hsl.h, base.h) / 180)
+      * Math.pow(c.share, 0.2);
     if (score > popScore) { popScore = score; pop = c.hsl; }
   }
   if (!pop) pop = { h: mod360(base.h + 180), s: Math.max(base.s, 45), l: 45 };
@@ -712,6 +741,24 @@ function extractPalette(imgSource) {
   return [norm(base), norm(mid), norm(pop)];
 }
 
+/* full-res-ish copy of the last photo, used for click-to-pick sampling */
+let photoCanvas = null;
+
+function samplePhotoAt(relX, relY) {
+  const cx = photoCanvas.getContext("2d");
+  const x = clamp(Math.round(relX * photoCanvas.width), 2, photoCanvas.width - 3);
+  const y = clamp(Math.round(relY * photoCanvas.height), 2, photoCanvas.height - 3);
+  const d = cx.getImageData(x - 2, y - 2, 5, 5).data;
+  let r = 0, g = 0, b = 0, n = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] < 200) continue;
+    r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+  }
+  if (!n) return null;
+  const c = rgbToHsl(r / n, g / n, b / n);
+  return { h: Math.round(c.h), s: Math.round(c.s), l: Math.round(c.l) };
+}
+
 function handlePhoto(file) {
   if (!file || !file.type.startsWith("image/")) return;
   showToast(L().ui.analysing);
@@ -720,10 +767,17 @@ function handlePhoto(file) {
   img.onload = () => {
     const cores = extractPalette(img);
     if (!cores) { showToast(L().ui.imgError); URL.revokeObjectURL(url); return; }
+    photoCanvas = document.createElement("canvas");
+    const scale = Math.min(800 / img.width, 800 / img.height, 1);
+    photoCanvas.width = Math.max(1, Math.round(img.width * scale));
+    photoCanvas.height = Math.max(1, Math.round(img.height * scale));
+    photoCanvas.getContext("2d", { willReadFrequently: true })
+      .drawImage(img, 0, 0, photoCanvas.width, photoCanvas.height);
     photoThumb.src = url; // kept alive for the thumbnail
     state.photoCores = cores;
     state.mode = "photo";
     state.bright = {};
+    state.armedChip = null;
     /* base colour follows the photo so the classic moods riff on it too */
     state.h = cores[0].h; state.s = cores[0].s; state.l = cores[0].l;
     renderAll();
@@ -731,6 +785,20 @@ function handlePhoto(file) {
   img.onerror = () => { showToast(L().ui.imgError); URL.revokeObjectURL(url); };
   img.src = url;
 }
+
+/* click-to-pick: arm a chip, then pull the colour from the photo */
+photoThumb.addEventListener("click", e => {
+  if (!photoCanvas || state.armedChip === null || !state.photoCores) return;
+  const r = photoThumb.getBoundingClientRect();
+  const c = samplePhotoAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height);
+  if (!c) return;
+  const i = state.armedChip;
+  state.photoCores[i] = c;
+  if (i === 0) { state.h = c.h; state.s = c.s; state.l = c.l; }
+  delete state.bright[i];
+  showToast(`${hslToHex(c)} ✓`);
+  renderAll();
+});
 
 /* ================================================================
    Interactions
@@ -823,8 +891,15 @@ document.addEventListener("click", e => {
 
   const chip = e.target.closest("[data-chip]");
   if (chip) {
-    const hsl = rgbToHsl(...hexToRgb(chip.dataset.chip));
-    state.h = hsl.h; state.s = hsl.s; state.l = hsl.l;
+    const i = +chip.dataset.chip;
+    if (photoCanvas && photoThumb.getAttribute("src")) {
+      /* arm / disarm for click-to-pick */
+      state.armedChip = state.armedChip === i ? null : i;
+    } else if (state.photoCores) {
+      /* no image available (restored from a share link): use as base */
+      const c = state.photoCores[i];
+      state.h = c.h; state.s = c.s; state.l = c.l;
+    }
     renderAll();
   }
 });
