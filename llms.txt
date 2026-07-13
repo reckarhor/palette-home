@@ -1,0 +1,35 @@
+# Palette Home
+
+> Free, fully client-side colour wheel and palette generator for home
+> decorating, in English and German. Pick a colour and a harmony, or
+> extract colours from a photo, and get a decor-ready 60-30-10 palette
+> with a live room preview. No accounts, no tracking, no uploads.
+
+URL: https://reckarhor.github.io/palette-home/
+
+## What it does
+
+- Interactive colour wheel with six harmonies: complementary,
+  split-complementary, analogous, triadic, tetradic, monochromatic.
+- Every palette is mapped to interior-design roles using the 60-30-10
+  rule: dominant (walls, large furniture), secondary (sofa, curtains),
+  accent (cushions, art, lamps).
+- Each swatch shows its LRV (Light Reflectance Value, the 0-100 scale
+  printed on paint chips) and a warm/cool undertone badge, plus a
+  7-step brightness ladder; clicking a step repaints the palette and
+  the room illustration with that exact colour.
+- The dominant colour is softened into a wall-ready paint tint,
+  adjusted for room light (dim/north-facing, average, bright/south).
+- Photo palettes: an uploaded photo of a room, rug or artwork is
+  analysed on-device (k-means clustering, nothing uploaded) into base,
+  supporting and pop colours; a lightbox lets users click the photo to
+  correct any of the three.
+- Palettes are encoded in the URL for sharing:
+  c = base hex, m = harmony mood, d = room light, b = brightness picks,
+  p = photo palette (three hex values).
+
+## Facts
+
+- Free, static site, no backend, no analytics, no cookies.
+- Languages: English and German (switcher; defaults to device language).
+- Source: https://github.com/reckarhor/palette-home

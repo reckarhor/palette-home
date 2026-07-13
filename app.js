@@ -77,8 +77,9 @@ function textOn(c) { return lrvOf(c) > 45 ? "#1E1C19" : "#FFFFFF"; }
 const I18N = {
   en: {
     ui: {
-      docTitle: "Palette Home — colour schemes for real rooms",
-      metaDesc: "Pick a colour, choose a mood, and get a decor-ready palette with wall, furniture and accent roles assigned.",
+      docTitle: "Palette Home — colour wheel & palette generator for home decor",
+      metaDesc: "Free colour wheel for interiors: pick a colour and a harmony — complementary, analogous, triadic — and get a 60-30-10 room palette with wall, sofa and accent roles, LRV values and a live room preview.",
+      intro: "Pick a colour and a mood — complementary, analogous, triadic and more — and get a decor-ready palette: wall, sofa and accent roles, paint-chip LRV values, tints and shades, and a live room preview. Free, in your browser, nothing uploaded.",
       tagline: "Colour schemes for real rooms",
       share: "Share palette",
       shareTitle: "Copy a shareable link to this palette",
@@ -184,8 +185,9 @@ const I18N = {
 
   de: {
     ui: {
-      docTitle: "Palette Home — Farbkonzepte für echte Räume",
-      metaDesc: "Farbe wählen, Stimmung festlegen — und eine einrichtungsfertige Palette mit Rollen für Wand, Möbel und Akzente erhalten.",
+      docTitle: "Palette Home — Farbkreis & Paletten-Generator fürs Zuhause",
+      metaDesc: "Kostenloser Farbkreis für die Einrichtung: Farbe und Harmonie wählen — komplementär, analog, triadisch — und eine 60-30-10-Palette mit Rollen für Wand, Sofa und Akzente, LRV-Werten und Live-Raumvorschau erhalten.",
+      intro: "Wähle Farbe und Stimmung — komplementär, analog, triadisch und mehr — und erhalte eine einrichtungsfertige Palette: Rollen für Wand, Sofa und Akzente, LRV-Werte, Auf- und Abtönungen und eine Live-Raumvorschau. Kostenlos, im Browser, ohne Upload.",
       tagline: "Farbkonzepte für echte Räume",
       share: "Palette teilen",
       shareTitle: "Link zu dieser Palette kopieren",

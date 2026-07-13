@@ -3,15 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Palette Home — colour schemes for real rooms</title>
-<meta name="description" content="Pick a colour, choose a mood, and get a decor-ready palette with wall, furniture and accent roles assigned.">
+<title>Palette Home — colour wheel &amp; palette generator for home decor</title>
+<meta name="description" content="Free colour wheel for interiors: pick a colour and a harmony — complementary, analogous, triadic — and get a 60-30-10 room palette with wall, sofa and accent roles, LRV values and a live room preview.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="canonical" href="https://reckarhor.github.io/palette-home/">
+<meta name="theme-color" content="#3A7D6B">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Palette Home">
+<meta property="og:title" content="Palette Home — colour wheel &amp; palette generator for home decor">
+<meta property="og:description" content="Pick a colour and a harmony, get a decor-ready 60-30-10 palette with wall, sofa and accent roles, LRV values and a live room preview. Free and fully in your browser.">
+<meta property="og:url" content="https://reckarhor.github.io/palette-home/">
+<meta property="og:image" content="https://reckarhor.github.io/palette-home/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_GB">
+<meta property="og:locale:alternate" content="de_DE">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Palette Home",
+  "url": "https://reckarhor.github.io/palette-home/",
+  "description": "Colour wheel and palette generator for home decorating. Pick a colour and a harmony (complementary, split-complementary, analogous, triadic, tetradic, monochromatic) or extract colours from a photo, and get a 60-30-10 palette with wall, sofa and accent roles, LRV light-reflectance values, tints and shades, and a live room preview.",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any (web browser)",
+  "browserRequirements": "Requires JavaScript",
+  "inLanguage": ["en", "de"],
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+  "featureList": [
+    "Interactive colour wheel with six colour harmonies",
+    "60-30-10 decor role assignment (walls, sofa, accents)",
+    "LRV (light reflectance value) and warm/cool undertone badges",
+    "Wall-ready paint tints adjusted for room light direction",
+    "Brightness ladders with per-role selection and live room preview",
+    "On-device photo colour extraction with click-to-pick correction",
+    "Shareable palette URLs, English and German, light and dark mode"
+  ]
+}
+</script>
 </head>
 <body>
 
 <header class="site-header">
   <div class="brand">
-    <span class="brand-mark" aria-hidden="true"></span>
+    <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true">
+      <path d="M24 2 A22 22 0 0 1 39.6 8.4 L33.5 14.5 A13.5 13.5 0 0 0 24 10.5 Z" fill="#C65B4E"/>
+      <path d="M39.6 8.4 A22 22 0 0 1 46 24 L37.5 24 A13.5 13.5 0 0 0 33.5 14.5 Z" fill="#D98E3B"/>
+      <path d="M46 24 A22 22 0 0 1 39.6 39.6 L33.5 33.5 A13.5 13.5 0 0 0 37.5 24 Z" fill="#D9B44A"/>
+      <path d="M39.6 39.6 A22 22 0 0 1 24 46 L24 37.5 A13.5 13.5 0 0 0 33.5 33.5 Z" fill="#7FA05A"/>
+      <path d="M24 46 A22 22 0 0 1 8.4 39.6 L14.5 33.5 A13.5 13.5 0 0 0 24 37.5 Z" fill="#3F8E7B"/>
+      <path d="M8.4 39.6 A22 22 0 0 1 2 24 L10.5 24 A13.5 13.5 0 0 0 14.5 33.5 Z" fill="#4E7CA8"/>
+      <path d="M2 24 A22 22 0 0 1 8.4 8.4 L14.5 14.5 A13.5 13.5 0 0 0 10.5 24 Z" fill="#7A63A0"/>
+      <path d="M8.4 8.4 A22 22 0 0 1 24 2 L24 10.5 A13.5 13.5 0 0 0 14.5 14.5 Z" fill="#B75C82"/>
+      <circle cx="24" cy="24" r="13.5" fill="var(--panel)"/>
+      <path d="M24 15 L32.2 23.2 L29.6 23.2 L29.6 31.5 L18.4 31.5 L18.4 23.2 L15.8 23.2 Z" fill="currentColor"/>
+      <rect x="22.4" y="26" width="3.2" height="5.5" fill="var(--panel)"/>
+    </svg>
     <div>
       <h1>Palette Home</h1>
       <p class="tagline" data-i18n="tagline">Colour schemes for real rooms</p>
@@ -26,6 +76,8 @@
     <button id="themeToggle" class="ghost-btn icon-btn" data-i18n-title="themeTitle" aria-label="Toggle theme">◐</button>
   </div>
 </header>
+
+<p class="intro" data-i18n="intro">Pick a colour and a mood — complementary, analogous, triadic and more — and get a decor-ready palette: wall, sofa and accent roles, paint-chip LRV values, tints and shades, and a live room preview. Free, in your browser, nothing uploaded.</p>
 
 <main class="layout">
 

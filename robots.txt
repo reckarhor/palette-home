@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://reckarhor.github.io/palette-home/sitemap.xml
