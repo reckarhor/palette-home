@@ -989,7 +989,7 @@ applyTheme(localStorage.getItem("ph-theme") ||
    Analytics (Google Analytics 4, loaded only after consent)
    ================================================================ */
 
-const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: replace with your real GA4 Measurement ID
+const GA_MEASUREMENT_ID = "G-0NB1QCKX8G";
 
 function loadAnalytics() {
   if (GA_MEASUREMENT_ID.includes("XXXX")) {
