@@ -224,10 +224,19 @@
 </main>
 
 <footer class="site-footer">
-  <p data-i18n="footer">All colour maths runs in your browser — nothing is uploaded or tracked. LRV = Light Reflectance Value (0 dark – 100 light).</p>
+  <p data-i18n="footer">LRV = Light Reflectance Value (0 dark – 100 light).</p>
+  <button id="privacyChoiceBtn" class="link-btn" data-i18n="privacyChoice">Cookie choices</button>
 </footer>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div id="consentBanner" class="consent-banner" hidden role="region" aria-label="Cookie consent">
+  <p data-i18n="consentText">We use Google Analytics to understand how visitors use Palette Home. No data is sold. You can decline and still use everything.</p>
+  <div class="consent-actions">
+    <button id="consentDecline" class="ghost-btn" data-i18n="consentDecline">Decline</button>
+    <button id="consentAccept" class="ghost-btn primary" data-i18n="consentAccept">Accept</button>
+  </div>
+</div>
 
 <div id="photoModal" class="photo-modal" hidden>
   <div class="photo-modal-inner">

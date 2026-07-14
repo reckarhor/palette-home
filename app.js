@@ -96,7 +96,11 @@ const I18N = {
       ratioHint: "Interior designers split a room roughly 60% dominant (walls, big pieces), 30% secondary (sofa, curtains), 10% accent (cushions, art, lamps).",
       roomTitle: "In a room",
       whyTitle: "Why these colours work",
-      footer: "All colour maths runs in your browser — nothing is uploaded or tracked. LRV = Light Reflectance Value (0 dark – 100 light).",
+      footer: "LRV = Light Reflectance Value (0 dark – 100 light).",
+      privacyChoice: "Cookie choices",
+      consentText: "We use Google Analytics to understand how visitors use Palette Home. No data is sold. You can decline and still use everything.",
+      consentAccept: "Accept",
+      consentDecline: "Decline",
       dirDim: "Dim / north-facing",
       dirAvg: "Average light",
       dirBright: "Bright / south-facing",
@@ -204,7 +208,11 @@ const I18N = {
       ratioHint: "Einrichtungsprofis teilen einen Raum grob in 60 % Hauptfarbe (Wände, große Möbel), 30 % Zweitfarbe (Sofa, Vorhänge) und 10 % Akzentfarbe (Kissen, Kunst, Lampen).",
       roomTitle: "Im Raum",
       whyTitle: "Warum diese Farben funktionieren",
-      footer: "Alle Farbberechnungen laufen in deinem Browser — nichts wird hochgeladen oder getrackt. LRV = Lichtreflexionsgrad (0 dunkel – 100 hell).",
+      footer: "LRV = Lichtreflexionsgrad (0 dunkel – 100 hell).",
+      privacyChoice: "Cookie-Einstellungen",
+      consentText: "Wir nutzen Google Analytics, um zu verstehen, wie Besucher Palette Home nutzen. Es werden keine Daten verkauft. Du kannst ablehnen und die Seite trotzdem vollständig nutzen.",
+      consentAccept: "Akzeptieren",
+      consentDecline: "Ablehnen",
       dirDim: "Dunkel / Nordseite",
       dirAvg: "Mittleres Licht",
       dirBright: "Hell / Südseite",
@@ -414,6 +422,7 @@ const swatchesEl = $("swatches"), modeBlurb = $("modeBlurb");
 const ratioBar = $("ratioBar"), ratioLegend = $("ratioLegend");
 const whyText = $("whyText"), tipList = $("tipList"), roomCaption = $("roomCaption");
 const toast = $("toast"), langSwitch = $("langSwitch");
+const consentBanner = $("consentBanner"), consentAccept = $("consentAccept"), consentDecline = $("consentDecline"), privacyChoiceBtn = $("privacyChoiceBtn");
 const photoInput = $("photoInput"), photoResult = $("photoResult"), photoThumb = $("photoThumb"), photoChips = $("photoChips");
 
 /* ================================================================
@@ -975,6 +984,49 @@ themeToggle.addEventListener("click", () => {
 });
 applyTheme(localStorage.getItem("ph-theme") ||
   (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+/* ================================================================
+   Analytics (Google Analytics 4, loaded only after consent)
+   ================================================================ */
+
+const GA_MEASUREMENT_ID = "G-XXXXXXXXXX"; // TODO: replace with your real GA4 Measurement ID
+
+function loadAnalytics() {
+  if (GA_MEASUREMENT_ID.includes("XXXX")) {
+    console.info("Analytics: set GA_MEASUREMENT_ID in app.js to enable Google Analytics.");
+    return;
+  }
+  if (document.getElementById("ga-script")) return;
+  const s = document.createElement("script");
+  s.id = "ga-script";
+  s.async = true;
+  s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+  document.head.appendChild(s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function () { window.dataLayer.push(arguments); };
+  window.gtag("js", new Date());
+  window.gtag("config", GA_MEASUREMENT_ID);
+}
+
+function initConsent() {
+  const choice = localStorage.getItem("ph-consent");
+  if (choice === "granted") { loadAnalytics(); return; }
+  if (choice === "denied") return;
+  consentBanner.hidden = false;
+}
+consentAccept.addEventListener("click", () => {
+  localStorage.setItem("ph-consent", "granted");
+  consentBanner.hidden = true;
+  loadAnalytics();
+});
+consentDecline.addEventListener("click", () => {
+  localStorage.setItem("ph-consent", "denied");
+  consentBanner.hidden = true;
+});
+privacyChoiceBtn.addEventListener("click", () => {
+  consentBanner.hidden = false;
+});
+initConsent();
 
 /* ================================================================
    Init from URL + device language
